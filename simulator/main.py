@@ -1,12 +1,12 @@
+import sys
 import numpy as np
 
 from physics import PhysicsEngine
 from renderer import Renderer
 from world import World
 
-from objects import Robot
+from objects import RobotTree, TwoLink, Tree7
 from dynamics.ab_algorithm import ABAlgorithm
-
 
 def main():
 
@@ -17,16 +17,17 @@ def main():
 
     world = World(physics, renderer)
 
-    robot = Robot()
-    robot.some_tree(2)
+    # robot = TwoLink()
+    # robot = Tree7()
+
+    robot = RobotTree()
+    robot.some_tree(8,2)
 
     world.add_object(robot)
-    world.run(5000)
 
-    # try:
-    #     world.run(5000)
-    # except Exception as e:
-    #     print(e)
+    world.run(1000)
+
+
 
 if __name__=="__main__":
     main()

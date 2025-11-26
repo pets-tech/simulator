@@ -7,7 +7,7 @@ class World:
         self.renderer = renderer
         self.objects = []
         self.time = 0
-        self.dt = 0.01
+        self.dt = 0.02
 
     def set_plane(self, plane):
         self.plane = plane
@@ -17,7 +17,7 @@ class World:
 
     def step(self, i):
         self.physics.update(self.objects, self.dt)
-        if i % 5 == 0:
+        if i % 2 == 0:
             self.renderer.update(self.objects)
         self.time += self.dt
 

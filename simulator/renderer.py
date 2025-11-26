@@ -19,6 +19,12 @@ class Renderer:
         self.ax.set_ylim(y_limits)
         self.ax.set_aspect('equal')
 
+        # world frame
+        self.ax.annotate('', xy=(x_limits[1]/10, 0), xytext=(0, 0),
+                        arrowprops=dict(arrowstyle='->', color='red', alpha=0.5))
+        self.ax.annotate('', xy=(0, y_limits[1]/10), xytext=(0, 0),
+                        arrowprops=dict(arrowstyle='->', color='green', alpha=0.5))
+
         plt.show(block=False)
 
         self.links_lines = None
@@ -35,49 +41,62 @@ class Renderer:
             all_links = []
             all_points = []
 
-            def draw_tree(parents, q):
-                nodes = [(0.0, 0.0)]
+            def draw_tree(obj, q):
+                parents = obj.model['parent']
+                nodes = []
                 edges = []
                 angles = [0.0] * len(parents)
                 
-                for i in range(0, len(parents)):
+                length = 1.0
+
+                for i in range(len(parents)):
                     parent = parents[i]
-
-                    x_p, y_p = nodes[parent]
-                    angles[i] = angles[parent] + q[i]
-
-                    length = 1.0
+                    
+                    if parent == -1:
+                        x_p, y_p = 0.0, 0.0
+                        angles[i] = q[i]
+                    else:
+                        x_p, y_p = nodes[parent]
+                        angles[i] = angles[parent] + q[i]
                     
                     x_child = x_p + length * np.cos(angles[i])
                     y_child = y_p + length * np.sin(angles[i])
                     
                     nodes.append((x_child, y_child))
                     edges.append((x_p, y_p, x_child, y_child))
-                
+
                 return nodes, edges
 
             for obj in objects:
-                
-                nodes, edges = draw_tree(obj.model['parent'], obj.q)
-
                 links = []
-                for i in range(1, len(obj.q)):
-                    parent = obj.model['parent'][i]
-                    x_p, y_p = nodes[parent]
-                    x_c, y_c = nodes[i]
+                points = []
+                
+                nodes, edges = draw_tree(obj, obj.q)
+                
+                for edge in edges:
+                    x_p, y_p, x_c, y_c = edge
                     links.append([[x_p, y_p], [x_c, y_c]])
+                
 
                 links = np.array(links)
                 points = np.array(nodes)
                 
+                all_links.append(links)
+                all_points.append(points)
+                
+                
                 if self.links_lines is None:
-                    self.links_lines = LineCollection(links, colors=self.colors, linewidths=2)
+                    self.links_lines = LineCollection(links, colors=self.colors, linewidths=3)
                     self.ax.add_collection(self.links_lines)
                     
                     self.joints_circles = self.ax.scatter(
                         points[:, 0], points[:, 1], 
-                        c='lightblue', s=20, zorder=10
+                        c='lightblue', s=40, zorder=10
                     )
+                    self.ax.scatter(
+                        0.0, 0.0,
+                        c='blue', s=50, zorder=10
+                    )                    
                 else:
                     self.links_lines.set_segments(links)
                     self.joints_circles.set_offsets(points)
@@ -87,4 +106,3 @@ class Renderer:
 
     def close(self):
         plt.close(self.fig)
-        logger.debug("Render window closed")
