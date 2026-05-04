@@ -1,26 +1,23 @@
 import numpy as np
 from spatial.so import SO3, so3
 
+
 def skew(v):
     v = v.flatten()
-    return np.array([
-            [0,    -v[2],  v[1]],
-            [v[2],  0,    -v[0]],
-            [-v[1],  v[0],  0]
-    ])
+    return np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+
 
 def unskew(A):
-    return 0.5 * np.array([A[2,1] - A[1,2], A[0,2] - A[2,0], A[1,0] - A[0,1]])
+    return 0.5 * np.array([A[2, 1] - A[1, 2], A[0, 2] - A[2, 0], A[1, 0] - A[0, 1]])
 
 
 def crm(v):
-    return np.block([
-        [skew(v[:3]), np.zeros((3,3))], 
-        [skew(v[3:]), skew(v[:3])]
-    ])
+    return np.block([[skew(v[:3]), np.zeros((3, 3))], [skew(v[3:]), skew(v[:3])]])
+
 
 def crf(v):
     return -crm(v).T
+
 
 class se3:
     def __init__(self, w, v):
@@ -33,8 +30,7 @@ class se3:
 
     def hat(self):
         w_hat = so3.hat(self.w)
-        return np.vstack([np.hstack([w_hat, self.v]),
-                          np.zeros((1, 4))])
+        return np.vstack([np.hstack([w_hat, self.v]), np.zeros((1, 4))])
 
     @staticmethod
     def vee(twist_hat):
@@ -54,11 +50,12 @@ class se3:
             R = so3_obj.exp().matrix
             k = self.w / theta
             K = so3.hat(k)
-            B = (1 - np.cos(theta)) / (theta ** 2)
-            D = (theta - np.sin(theta)) / (theta ** 3)
+            B = (1 - np.cos(theta)) / (theta**2)
+            D = (theta - np.sin(theta)) / (theta**3)
             V = np.eye(3) + B * K + D * K @ K
             t = V @ self.v
         return SE3(R, t)
+
 
 class SE3:
     def __init__(self, R, t=None):
@@ -67,8 +64,7 @@ class SE3:
 
     @property
     def matrix(self):
-        return np.vstack([np.hstack([self.R, self.t]),
-                          np.array([[0, 0, 0, 1]])])
+        return np.vstack([np.hstack([self.R, self.t]), np.array([[0, 0, 0, 1]])])
 
     def compose(self, other):
         R_new = self.R @ other.R
@@ -83,7 +79,7 @@ class SE3:
     def adjoint(self):
         R = self.R
         t_hat = so3.hat(self.t.flatten())
-        top = np.hstack([R, np.zeros((3,3))])
+        top = np.hstack([R, np.zeros((3, 3))])
         bottom = np.hstack([-R @ t_hat, R])
         return np.vstack([top, bottom])
 

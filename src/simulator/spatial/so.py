@@ -1,7 +1,7 @@
 import numpy as np
 
-class so3:
 
+class so3:
     def __init__(self, w):
         self.w = np.array(w, dtype=float).reshape(3)
 
@@ -11,18 +11,14 @@ class so3:
 
     @staticmethod
     def hat(w):
-        # R^3 → so(3) 
+        # R^3 → so(3)
         w = np.array(w).reshape(3)
-        return np.array([
-            [0,     -w[2],  w[1]],
-            [w[2],   0,    -w[0]],
-            [-w[1],  w[0],  0]
-        ])
+        return np.array([[0, -w[2], w[1]], [w[2], 0, -w[0]], [-w[1], w[0], 0]])
 
     @staticmethod
     def vee(W):
         # so(3) → R^3
-        return np.array([W[2,1], W[0,2], W[1,0]])
+        return np.array([W[2, 1], W[0, 2], W[1, 0]])
 
     def exp(self):
         theta = np.linalg.norm(self.w)
@@ -30,7 +26,7 @@ class so3:
             return SO3(np.eye(3))  # near zero → identity
         axis = self.w / theta
         K = so3.hat(axis)
-        R = np.eye(3) + np.sin(theta)*K + (1-np.cos(theta))*K@K
+        R = np.eye(3) + np.sin(theta) * K + (1 - np.cos(theta)) * K @ K
         return SO3(R)
 
     def __add__(self, other):
@@ -38,7 +34,6 @@ class so3:
 
 
 class SO3:
-
     def __init__(self, R=None):
         self._R = np.eye(3) if R is None else np.array(R, dtype=float)
 
@@ -87,22 +82,24 @@ class SO3:
         q13 = x * z
         q23 = y * z
 
-        R = 2 * np.array([
-            [q0s + q1s - 0.5, q12 + q03,     q13 - q02],
-            [q12 - q03,       q0s + q2s - 0.5, q23 + q01],
-            [q13 + q02,       q23 - q01,     q0s + q3s - 0.5]
-        ])
+        R = 2 * np.array(
+            [
+                [q0s + q1s - 0.5, q12 + q03, q13 - q02],
+                [q12 - q03, q0s + q2s - 0.5, q23 + q01],
+                [q13 + q02, q23 - q01, q0s + q3s - 0.5],
+            ]
+        )
 
         return SO3(R)
 
     @staticmethod
     def rx(theta):
-        return SO3.from_axis_angle((1,0,0), theta).matrix
+        return SO3.from_axis_angle((1, 0, 0), theta).matrix
 
     @staticmethod
     def ry(theta):
-        return SO3.from_axis_angle((0,1,0), theta).matrix
+        return SO3.from_axis_angle((0, 1, 0), theta).matrix
 
     @staticmethod
     def rz(theta):
-        return SO3.from_axis_angle((0,0,1), theta).matrix
+        return SO3.from_axis_angle((0, 0, 1), theta).matrix

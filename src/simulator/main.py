@@ -8,6 +8,7 @@ from world import World
 from objects import RobotTree, TwoLink, Tree7, CartPole
 from dynamics.ab_algorithm import ABAlgorithm
 
+
 def main():
 
     fd_solver = ABAlgorithm()
@@ -25,12 +26,10 @@ def main():
 
     robot = CartPole()
 
-
     world.add_object(robot)
 
     world.run(1000)
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
